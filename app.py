@@ -1,29 +1,54 @@
 import streamlit as st
 import joblib
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from math import pi
 
-# Charger le modèle avec joblib
-model = joblib.load("rf_model_grade.joblib")  # Charger le modèle sauvegardé avec joblib
+# Charger le modèle
+model = joblib.load("rf_model_grade.joblib")
 
 # Titre de l'application
 st.title("Prédiction des Notes")
+st.markdown("## Prédisez les notes des étudiants en fonction de plusieurs critères !")
 
-# Créer des champs de saisie pour les variables
-socio_score = st.number_input("Socioeconomic Score:", min_value=0.0, max_value=100.0, step=0.1)
-study_hours = st.number_input("Study Hours:", min_value=0.0, max_value=24.0, step=0.1)
-sleep_hours = st.number_input("Sleep Hours:", min_value=0.0, max_value=24.0, step=0.1)
-attendance = st.number_input("Attendance (%):", min_value=0.0, max_value=100.0, step=0.1)
+# Champs de saisie
+socio_score = st.slider("Score Socioéconomique", 0.0, 100.0, 50.0, 0.1)
+study_hours = st.slider("Heures d'Étude", 0.0, 24.0, 5.0, 0.1)
+sleep_hours = st.slider("Heures de Sommeil", 0.0, 24.0, 7.0, 0.1)
+attendance = st.slider("Présence (%)", 0.0, 100.0, 90.0, 0.1)
 
-# Bouton pour prédire les notes
-if st.button("Predict Grade"):
+# Bouton de prédiction
+if st.button("Prédire la Note"):
     try:
-        # Créer un tableau avec les valeurs saisies
+        # Création de l'input pour le modèle
         user_input = np.array([[socio_score, study_hours, sleep_hours, attendance]])
-
-        # Prédire avec le modèle
         predicted_grade = model.predict(user_input)
         
-        # Afficher la prédiction
-        st.success(f"Predicted Grade: {predicted_grade[0]:.2f}")
+        # Affichage du résultat
+        st.success(f"Note Prédite : {predicted_grade[0]:.2f}")
+        
+        # Radar Chart (Diagramme en toile d'araignée)
+        categories = ['Socioeconomic', 'Study Hours', 'Sleep Hours', 'Attendance']
+        values = [socio_score, study_hours, sleep_hours, attendance]
+        
+        values += values[:1]  # Boucler le graphique
+        angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+        angles += angles[:1]
+        
+        fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+        ax.fill(angles, values, color='blue', alpha=0.3)
+        ax.plot(angles, values, color='blue', linewidth=2)
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(categories)
+        st.pyplot(fig)
+        
     except ValueError:
-        st.error("Please enter valid numbers for all fields.")
+        st.error("Veuillez entrer des valeurs valides.")
+
+# Personnalisation de la section About
+st.sidebar.markdown("## À propos")
+st.sidebar.info(
+    "Cette application utilise un modèle de Machine Learning pour prédire les notes des étudiants en fonction de plusieurs facteurs tels que les heures d'étude, le sommeil, la présence et le statut socioéconomique.\n\n"+
+    "Copyright CelestWeb | 2025")
