@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from math import pi
 
 # Charger le modèle
-model = joblib.load("rf_model_grade.joblib")
+model = joblib.load("rf_model_grade.joblib", mmap_mode=None)
+
 
 # Titre de l'application
 st.title("Prédiction des Notes")
