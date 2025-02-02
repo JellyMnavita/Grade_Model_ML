@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from math import pi
 
 # Charger le modèle
-model = joblib.load("rf_model_grade.joblib", mmap_mode=None)
+model = joblib.load("rf_model_grade.joblib")
 
 
 # Titre de l'application
